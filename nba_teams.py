@@ -1,4 +1,4 @@
-[
+nba_teams_data = [
     {
         "teamId": 1610612737,
         "abbreviation": "ATL",

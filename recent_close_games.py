@@ -4,12 +4,12 @@ import requests
 from datetime import date, timedelta
 from PyInquirer import prompt
 from prompt_toolkit.validation import ValidationError
+from nba_teams import nba_teams_data
 
 last_week = (date.today() - timedelta(weeks=1)).isoformat()
-
-with open("nba_teams.json", "r") as f:
-    nba_teams_data = json.loads(f.read())
 nba_teams = [team["teamName"] for team in nba_teams_data]
+
+print(nba_teams)
 
 
 def dateValidation(d: str):
@@ -70,7 +70,7 @@ questions = [
 ]
 
 
-def getGamesFromDate(start_date: str, teams=None):
+def getGamesFromDate(start_date: str, teams):
     params = {"start_date": start_date, "per_page": 100}
 
     res = requests.get("https://www.balldontlie.io/api/v1/games", params=params).json()
@@ -85,10 +85,11 @@ def getGamesFromDate(start_date: str, teams=None):
         page_request_params = params.copy()
         page_request_params["page"] = page_num
 
+        print(f"Processing page {page_num} of {total_pages}...", end="\r")
         page_res = requests.get("https://www.balldontlie.io/api/v1/games", params=page_request_params).json()
         page_data = page_res["data"]
 
-        if teams is not None:
+        if teams != [""]:
             page_data = list(filter(lambda x: x["home_team"]["full_name"] in teams or x["visitor_team"]["full_name"] in teams, page_data))
 
         all_games.extend(page_data)
@@ -96,7 +97,7 @@ def getGamesFromDate(start_date: str, teams=None):
     return all_games
 
 
-def getCloseGamesFromDate(start_date: str, threshold=5, teams=None):
+def getCloseGamesFromDate(start_date: str, teams, threshold=5):
     all_games = getGamesFromDate(start_date, teams)
     difference_between = lambda x, y: abs(int(x) - int(y))
     close_games = [game for game in all_games if
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     threshold: int = int(answers["threshold"])
     teams: list[str] = answers["team"].split(",")
 
-    close_games = getCloseGamesFromDate(last_week, threshold, teams)
+    close_games = getCloseGamesFromDate(start_date, teams, threshold)
     sorted_close_games = sorted(close_games, key=lambda game: game["date"])
 
     if len(sorted_close_games) == 0:
