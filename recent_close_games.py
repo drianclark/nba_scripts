@@ -9,8 +9,6 @@ from nba_teams import nba_teams_data
 last_week = (date.today() - timedelta(weeks=1)).isoformat()
 nba_teams = [team["teamName"] for team in nba_teams_data]
 
-print(nba_teams)
-
 
 def dateValidation(d: str):
     try:
@@ -63,7 +61,7 @@ questions = [
     {
         'type': 'input',
         'name': 'team',
-        'message': 'Teams (comma-separated):',
+        'message': 'Teams (optional, comma-separated):',
         'default': '',
         'validate': lambda t: teamsValidation(t)
     }
@@ -129,3 +127,6 @@ if __name__ == "__main__":
         shuffle(scores)
 
         print(f'{game_date}\t{home_team} vs {visitor_team}: {scores[0]} - {scores[1]}')
+
+    print()
+    input("Press enter to exit...")
